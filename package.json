@@ -1,0 +1,11 @@
+{
+  "name": "nuvyra-neo",
+  "version": "1.0.0",
+  "description": "Nuvyra Neo - Auto Deploy Website",
+  "scripts": {
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
