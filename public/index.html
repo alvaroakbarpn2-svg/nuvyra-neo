@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nuvyra Neo ⚡ Auto Deploy Website</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #1a1a1a;
+    --bg2: #222222;
+    --bg3: #2a2a2a;
+    --bg4: #333333;
+    --border: #404040;
+    --border-glow: rgba(200, 200, 200, 0.4);
+    --secondary: #7a7a7a;
+    --accent: #b0b0b0;
+    --text: #f0f0f0;
+    --highlight: #e8e8e8;
+    --muted: #8a8a8a;
+    --red: #f87171;
+    --btn-a: #9a9a9a;
+    --btn-b: #d0d0d0;
+  }
+  html, body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    padding: 16px 16px 60px; position: relative; overflow-x: hidden;
+  }
+
+  /* BG EFFECTS */
+  .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(200,200,200,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(200,200,200,0.06) 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: 0; mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%); }
+  @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+  .bg-orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; opacity: 0.4; }
+  .orb1 { width: 320px; height: 320px; background: radial-gradient(circle, #7a7a7a, transparent 70%); top: -120px; left: -120px; animation: float1 15s ease-in-out infinite; }
+  .orb2 { width: 280px; height: 280px; background: radial-gradient(circle, #b0b0b0, transparent 70%); bottom: -100px; right: -100px; animation: float2 18s ease-in-out infinite; }
+  .orb3 { width: 220px; height: 220px; background: radial-gradient(circle, #d0d0d0, transparent 70%); top: 40%; right: 20%; animation: float3 22s ease-in-out infinite; opacity: 0.3; }
+  @keyframes float1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 80px) scale(1.15); } }
+  @keyframes float2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-40px, -60px) scale(1.1); } }
+  @keyframes float3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-80px, 40px); } }
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle { position: absolute; width: 2px; height: 2px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); opacity: 0; animation: particleFloat linear infinite; }
+  @keyframes particleFloat { 0% { transform: translateY(100vh) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100px) translateX(50px); opacity: 0; } }
+  .container { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* BRAND */
+  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .brand-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(200,200,200,0.5), 0 0 60px rgba(240,240,240,0.25); animation: pulse 2.5s ease-in-out infinite; background: var(--bg3); border: 1.5px solid var(--border); }
+  .brand-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; filter: grayscale(100%) brightness(1.1); }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 30px rgba(200,200,200,0.5), 0 0 60px rgba(240,240,240,0.25); } 50% { box-shadow: 0 0 45px rgba(200,200,200,0.8), 0 0 90px rgba(240,240,240,0.4); } }
+  .brand-icon::after { content: ''; position: absolute; inset: -3px; border-radius: 16px; background: linear-gradient(135deg, var(--highlight), transparent, var(--accent)); z-index: -1; animation: rotate 3s linear infinite; opacity: 0.5; }
+  @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .brand-text h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, var(--text), var(--highlight)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .brand-text p { font-size: 11px; color: var(--muted); font-family: ui-monospace, monospace; margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; background: var(--highlight); border-radius: 50%; box-shadow: 0 0 10px var(--highlight); animation: blink 1.5s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1.5px solid var(--border); border-radius: 20px; padding: 28px 20px; text-align: center; margin-bottom: 16px; position: relative; overflow: hidden; animation: slideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .hero::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--highlight), transparent); animation: shimmer 3s linear infinite; }
+  @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .platform-badge { position: absolute; top: 16px; right: 16px; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; z-index: 2; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+  .platform-badge img { width: 14px; height: 14px; object-fit: contain; filter: grayscale(100%); }
+  .platform-badge.vercel { background: linear-gradient(135deg, #909090, #c0c0c0); color: #1a1a1a; box-shadow: 0 4px 20px rgba(180,180,180,0.5); }
+  .platform-badge.netlify { background: linear-gradient(135deg, #808080, #b0b0b0); color: #f0f0f0; box-shadow: 0 4px 20px rgba(160,160,160,0.5); }
+
+  .hero-logo { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 40px rgba(200,200,200,0.5), 0 0 80px rgba(240,240,240,0.25); animation: heroFloat 3s ease-in-out infinite; background: var(--bg4); border: 2px solid var(--border); }
+  .hero-logo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(1.1); }
+  @keyframes heroFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+  .hero h2 { font-size: 26px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; letter-spacing: -1px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 50%, var(--text) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: textShine 4s linear infinite; }
+  @keyframes textShine { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+  .hero p { font-size: 12.5px; color: var(--muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
+
+  /* FORM */
+  .input-wrap { background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1.5px solid var(--border); border-radius: 20px; padding: 16px; margin-bottom: 16px; animation: slideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+
+  .label { display: block; font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; font-family: ui-monospace, monospace; }
+
+  .input-row { display: flex; align-items: center; background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 4px 16px; margin-bottom: 14px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+  .input-row:focus-within { border-color: var(--highlight); box-shadow: 0 0 30px rgba(200,200,200,0.4); }
+  .input-row svg, .input-row .prefix { color: var(--muted); flex-shrink: 0; transition: color 0.3s; font-family: ui-monospace, monospace; font-size: 12px; }
+  .input-row:focus-within svg, .input-row:focus-within .prefix { color: var(--highlight); }
+  .input-row input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; padding: 14px 12px; font-family: ui-monospace, monospace; font-weight: 500; }
+  .input-row input::placeholder { color: var(--muted); }
+
+  .input-hint { font-size: 10.5px; color: var(--muted); font-family: ui-monospace, monospace; margin-bottom: 14px; padding-left: 4px; }
+
+  /* PLATFORM PICKER */
+  .platform-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .platform-option { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .platform-option:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(200,200,200,0.15); }
+  .platform-option.active { background: linear-gradient(135deg, rgba(200,200,200,0.15), rgba(240,240,240,0.05)); border-color: var(--highlight); box-shadow: 0 0 25px rgba(200,200,200,0.35); }
+  .platform-option.active::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--highlight), transparent); }
+  .platform-option .logo-box { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
+  .platform-option .logo-box img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(100%) brightness(1.2); }
+  .platform-option .name { font-size: 12px; font-weight: 800; color: var(--text); letter-spacing: 0.3px; }
+  .platform-option.active .name { color: var(--highlight); }
+
+  /* UPLOAD TABS */
+  .upload-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .upload-tab { background: var(--bg); border: 1.5px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 4px; font-family: ui-monospace, monospace; }
+  .upload-tab:hover { border-color: var(--border-glow); color: var(--text); }
+  .upload-tab.active { background: linear-gradient(135deg, rgba(200,200,200,0.2), rgba(240,240,240,0.1)); border-color: var(--highlight); color: var(--highlight); box-shadow: 0 4px 15px rgba(200,200,200,0.3); }
+
+  /* DROP ZONE */
+  .drop-zone { background: var(--bg); border: 2px dashed var(--border); border-radius: 12px; padding: 30px 16px; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; margin-bottom: 14px; }
+  .drop-zone:hover { border-color: var(--highlight); background: linear-gradient(135deg, rgba(200,200,200,0.05), rgba(240,240,240,0.02)); }
+  .drop-zone.dragover { border-color: var(--highlight); background: linear-gradient(135deg, rgba(200,200,200,0.15), rgba(240,240,240,0.05)); transform: scale(1.02); box-shadow: 0 0 30px rgba(200,200,200,0.3); }
+  .drop-zone input[type="file"] { display: none; }
+  .drop-icon { font-size: 40px; margin-bottom: 10px; display: block; animation: cloudFloat 2.5s ease-in-out infinite; filter: grayscale(100%); }
+  @keyframes cloudFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .drop-title { font-size: 13.5px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+  .drop-subtitle { font-size: 11px; color: var(--muted); font-family: ui-monospace, monospace; }
+
+  .drop-files { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; text-align: left; }
+  .drop-file-item { display: flex; align-items: center; gap: 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 11px; font-family: ui-monospace, monospace; color: var(--text); animation: slideIn 0.3s ease-out; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  .drop-file-item .file-icon { font-size: 13px; filter: grayscale(100%); }
+  .drop-file-item .file-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drop-file-item .file-size { color: var(--muted); font-size: 9.5px; }
+  .drop-file-item .file-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; }
+  .drop-file-item .file-remove:hover { color: var(--red); background: rgba(248,113,113,0.15); }
+
+  /* DEPLOY BUTTON */
+  .btn-generate { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--btn-a), var(--btn-b)); background-size: 200% 200%; color: #1a1a1a; font-weight: 800; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; position: relative; overflow: hidden; letter-spacing: 0.3px; box-shadow: 0 4px 20px rgba(200,200,200,0.4); animation: gradientShift 3s ease infinite; }
+  @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .btn-generate:hover:not(:disabled) { box-shadow: 0 8px 40px rgba(240,240,240,0.6), 0 0 70px rgba(200,200,200,0.5); transform: translateY(-2px); }
+  .btn-generate:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  .btn-generate:disabled { opacity: 0.85; cursor: not-allowed; animation: none; }
+  .btn-generate .arrow { transition: transform 0.3s; display: inline-block; }
+  .btn-generate:hover:not(:disabled) .arrow { transform: translateX(5px); }
+  .btn-generate.loading .arrow { display: none; }
+  .btn-generate.loading::after { content: ''; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #1a1a1a; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* EMPTY STATE */
+  .empty-state { background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1.5px dashed var(--border); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .empty-icon { width: 72px; height: 72px; background: linear-gradient(135deg, var(--bg4), var(--bg2)); border: 1.5px solid var(--border); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; color: var(--highlight); font-size: 28px; position: relative; animation: floatIcon 3s ease-in-out infinite; overflow: hidden; }
+  .empty-icon img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(1.1); }
+  @keyframes floatIcon { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+  .empty-state h3 { font-size: 15px; color: var(--text); margin-bottom: 8px; font-weight: 700; }
+  .empty-state p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+  /* TERMINAL */
+  .terminal { background: linear-gradient(180deg, #151515, #1a1a1a); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 16px; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(200,200,200,0.15); }
+  .term-bar { background: rgba(42,42,42,0.9); padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  .term-bar span { font-size: 11px; color: var(--muted); font-family: ui-monospace, monospace; margin-left: 8px; }
+  .term-body { padding: 16px; font-family: ui-monospace, monospace; font-size: 12.5px; line-height: 1.8; }
+  .term-target { color: var(--highlight); word-break: break-all; }
+  .term-target span { color: var(--muted); }
+  .term-title { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; color: var(--text); font-size: 13.5px; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(200,200,200,0.25); border-top-color: var(--highlight); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  .term-desc { font-size: 11.5px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+  .prog-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: ui-monospace, monospace; }
+  .prog-row .pct { color: var(--highlight); font-weight: 700; }
+  .prog-bar { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+  .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--secondary), var(--accent), var(--highlight)); transition: width 0.3s; box-shadow: 0 0 15px var(--highlight); border-radius: 3px; }
+  .step-list { display: flex; flex-direction: column; gap: 8px; }
+  .step { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--muted); padding: 5px 0; transition: all 0.4s; opacity: 0.5; }
+  .step.active { color: var(--text); opacity: 1; }
+  .step.done { color: var(--highlight); opacity: 1; }
+  .step-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: var(--bg3); font-size: 11px; flex-shrink: 0; }
+  .step.done .step-icon { background: rgba(200,200,200,0.25); color: var(--text); box-shadow: 0 0 12px rgba(200,200,200,0.5); }
+  .step.active .step-icon { background: rgba(200,200,200,0.2); animation: stepPulse 1.2s ease-in-out infinite; }
+  @keyframes stepPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(240,240,240,0.5); } 50% { box-shadow: 0 0 0 6px rgba(240,240,240,0); } }
+
+  /* RESULT */
+  .result { display: none; margin-bottom: 16px; }
+  .result-header { background: linear-gradient(135deg, var(--bg4), var(--bg3)); border: 1.5px solid var(--border); border-radius: 16px 16px 0 0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .result-tab { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--text); }
+  .result-tab .tag { background: linear-gradient(135deg, rgba(200,200,200,0.3), rgba(240,240,240,0.2)); color: var(--highlight); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-family: ui-monospace, monospace; font-weight: 700; border: 1px solid var(--border-glow); display: inline-flex; align-items: center; gap: 4px; }
+  .result-tab .tag img { width: 12px; height: 12px; object-fit: contain; filter: grayscale(100%); }
+  .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sm { background: rgba(42,42,42,0.9); border: 1.5px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; font-weight: 600; transition: all 0.3s; }
+  .btn-sm:hover { border-color: var(--highlight); color: var(--highlight); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(200,200,200,0.4); }
+  .btn-sm.btn-all { background: linear-gradient(135deg, rgba(122,122,122,0.3), rgba(200,200,200,0.2)); border-color: var(--border-glow); color: var(--highlight); }
+  .btn-sm.btn-all:hover { background: linear-gradient(135deg, var(--secondary), var(--accent)); color: #1a1a1a; }
+  .status-bar { background: var(--bg2); border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 10.5px; color: var(--muted); font-family: ui-monospace, monospace; }
+  .status-ok { color: var(--highlight); display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  .status-dot-green { width: 7px; height: 7px; border-radius: 50%; background: var(--highlight); box-shadow: 0 0 12px var(--highlight); display: inline-block; animation: blink 1.5s ease-in-out infinite; }
+  .code-view { background: linear-gradient(180deg, #151515, #1a1a1a); border: 1.5px solid var(--border); border-radius: 0 0 16px 16px; padding: 20px 16px; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.8; color: var(--highlight); text-align: center; }
+  .deploy-url { font-size: 15px; font-weight: 800; color: var(--highlight); word-break: break-all; cursor: pointer; text-decoration: underline; }
+  .deploy-url:hover { color: #ffffff; }
+
+  /* HISTORY */
+  .history { background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-top: 16px; }
+  .history-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; }
+  .history-header .icon { color: var(--highlight); margin-right: 8px; display: inline-block; animation: rotate 4s linear infinite; }
+  .history-header span:last-child { color: var(--muted); font-size: 10px; font-family: ui-monospace, monospace; background: var(--bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); }
+  .history-body { max-height: 320px; overflow-y: auto; }
+  .hist-item { padding: 12px 16px; border-bottom: 1px solid rgba(64,64,64,0.5); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.25s; }
+  .hist-item:hover { background: rgba(200,200,200,0.08); }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-platform { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; overflow: hidden; background: rgba(255,255,255,0.05); }
+  .hist-platform img { width: 20px; height: 20px; object-fit: contain; filter: grayscale(100%) brightness(1.3); }
+  .hist-info { flex: 1; min-width: 0; }
+  .hist-name { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-url { color: var(--highlight); font-size: 10px; font-family: ui-monospace, monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-meta { color: var(--muted); font-size: 9.5px; font-family: ui-monospace, monospace; margin-top: 2px; }
+  .hist-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 6px; border-radius: 6px; opacity: 0; transition: all 0.2s; }
+  .hist-item:hover .hist-del { opacity: 1; }
+  .hist-del:hover { color: var(--red); background: rgba(248,113,113,0.15); }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 30px 0 10px; font-size: 10.5px; color: var(--muted); font-family: ui-monospace, monospace; }
+  .footer-glow { background: linear-gradient(90deg, var(--accent), var(--highlight), var(--accent)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: textShine 3s linear infinite; font-weight: 700; }
+
+  /* TERMS */
+  .terms { background: linear-gradient(135deg, rgba(42,42,42,0.8), rgba(26,26,26,0.9)); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; margin-top: 14px; animation: slideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both; }
+  .terms-title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+  .terms-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .terms-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .terms-list li::before { content: '▸'; color: var(--accent); flex-shrink: 0; font-size: 12px; }
+  .contact-title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; color: var(--text); margin-bottom: 12px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .contact-links { display: flex; flex-direction: column; gap: 8px; }
+  .contact-link { display: flex; align-items: center; gap: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.3s; }
+  .contact-link:hover { border-color: var(--highlight); background: linear-gradient(135deg, rgba(200,200,200,0.1), rgba(240,240,240,0.05)); transform: translateX(3px); }
+  .contact-link .icon { font-size: 16px; filter: grayscale(100%); }
+  .contact-link .arrow { margin-left: auto; color: var(--muted); font-size: 14px; }
+
+  /* LOADING */
+  .loading-screen { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #1a1a1a, #0f0f0f); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+  .loading-screen.active { display: flex; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .loading-logo { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; animation: heroFloat 1.5s ease-in-out infinite; box-shadow: 0 0 60px rgba(200,200,200,0.7), 0 0 120px rgba(240,240,240,0.35); overflow: hidden; border: 2px solid var(--border); background: var(--bg3); }
+  .loading-logo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(1.1); }
+  .loading-ring { width: 60px; height: 60px; border: 4px solid rgba(200,200,200,0.15); border-top-color: var(--highlight); border-right-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 20px; box-shadow: 0 0 25px rgba(200,200,200,0.4); }
+  .loading-text { color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .loading-subtext { color: var(--muted); font-size: 11.5px; font-family: ui-monospace, monospace; text-align: center; max-width: 300px; }
+  .loading-progress { width: 260px; height: 4px; background: var(--bg); border-radius: 4px; margin-top: 20px; overflow: hidden; border: 1px solid var(--border); }
+  .loading-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--secondary), var(--accent), var(--highlight)); background-size: 200% 100%; animation: gradientShift 1.5s linear infinite; transition: width 0.3s; box-shadow: 0 0 15px var(--highlight); }
+
+  /* MINI LOADER */
+  .mini-loader { position: fixed; inset: 0; z-index: 99998; background: rgba(26,26,26,0.8); display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+  .mini-loader.active { display: flex; animation: fadeIn 0.2s ease; }
+  .mini-loader-card { background: var(--bg3); border: 1.5px solid var(--border); border-radius: 16px; padding: 24px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); min-width: 220px; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .mini-loader-spinner { width: 40px; height: 40px; border: 3px solid rgba(200,200,200,0.15); border-top-color: var(--highlight); border-radius: 50%; animation: spin 0.8s linear infinite; box-shadow: 0 0 15px rgba(200,200,200,0.4); }
+  .mini-loader-text { color: var(--text); font-size: 13px; font-weight: 700; letter-spacing: 0.3px; text-align: center; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: linear-gradient(135deg, var(--secondary), var(--accent)); color: #1a1a1a; padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 700; box-shadow: 0 10px 40px rgba(200,200,200,0.5); z-index: 9999; opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--highlight); max-width: 90vw; }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.success { background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399; color: #FFFFFF; }
+  .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); border-color: #f87171; color: #FFFFFF; }
+
+  /* SUCCESS MODAL */
+  .success-modal { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+  .success-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+  .success-card { background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1.5px solid var(--border); border-radius: 20px; padding: 28px 24px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.8); animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+  .success-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--highlight), transparent); animation: shimmer 2s linear infinite; }
+  .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 42px; color: #FFFFFF; font-weight: 900; margin: 0 auto 16px; box-shadow: 0 0 40px rgba(16,185,129,0.7), 0 0 80px rgba(16,185,129,0.3); animation: successPulse 1.5s ease-in-out infinite; }
+  @keyframes successPulse { 0%, 100% { box-shadow: 0 0 40px rgba(16,185,129,0.7), 0 0 80px rgba(16,185,129,0.3); transform: scale(1); } 50% { box-shadow: 0 0 60px rgba(16,185,129,0.9), 0 0 120px rgba(16,185,129,0.5); transform: scale(1.05); } }
+  .success-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.5px; }
+  .success-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: ui-monospace, monospace; }
+  .success-url-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--highlight); word-break: break-all; margin-bottom: 16px; user-select: all; cursor: pointer; transition: all 0.2s; position: relative; }
+  .success-url-box:hover { border-color: #34d399; box-shadow: 0 0 25px rgba(16,185,129,0.4); background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); }
+  .success-url-box:hover::after { content: '📋 Klik untuk copy'; position: absolute; bottom: -20px; right: 0; font-size: 9px; color: #34d399; opacity: 1; }
+  .success-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .success-btn { flex: 1; min-width: 100px; padding: 13px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .success-btn-primary { background: linear-gradient(135deg, var(--btn-a), var(--btn-b)); color: #1a1a1a; box-shadow: 0 4px 15px rgba(200,200,200,0.4); }
+  .success-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(240,240,240,0.6); }
+  .success-btn-secondary { background: var(--bg); border: 1.5px solid var(--border); color: var(--text); }
+  .success-btn-secondary:hover { border-color: var(--highlight); color: var(--highlight); transform: translateY(-2px); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--secondary), var(--border)); border-radius: 4px; }
+
+  @media (min-width: 768px) {
+    body { padding: 30px 20px 60px; }
+    .hero h2 { font-size: 34px; }
+    .brand-text h1 { font-size: 22px; }
+    .hero-logo { width: 80px; height: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <!-- BRAND -->
+  <div class="brand">
+    <div class="brand-icon">
+      <img src="https://i.ibb.co.com/9HMVjd4Y/file-0000000060b081fa838565a4f4e4a0d3.png" alt="Nuvyra Neo">
+    </div>
+    <div class="brand-text">
+      <h1>Nuvyra Neo</h1>
+      <p><span class="status-dot"></span> Auto deploy website dalam hitungan detik</p>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="platform-badge vercel" id="platformBadge">
+      <img src="https://i.ibb.co.com/YFNsWZCV/IMG-20260926-192831.png" alt="Vercel">
+      Platform: VERCEL
+    </div>
+    <div class="hero-logo">
+      <img src="https://i.ibb.co.com/9HMVjd4Y/file-0000000060b081fa838565a4f4e4a0d3.png" alt="Nuvyra Neo">
+    </div>
+    <h2>Deploy Website.<br>Otomatis & Cepat.</h2>
+    <p>Upload file HTML, CSS, JavaScript, atau ZIP — website Anda langsung online dalam hitungan detik.</p>
+  </div>
+
+  <!-- FORM -->
+  <div class="input-wrap">
+
+    <label class="label">🌐 Domain Platform</label>
+    <div class="platform-picker">
+      <div class="platform-option active" data-platform="vercel" onclick="selectPlatform('vercel')">
+        <div class="logo-box"><img src="https://i.ibb.co.com/YFNsWZCV/IMG-20260926-192831.png" alt="Vercel"></div>
+        <div class="name">Vercel</div>
+      </div>
+      <div class="platform-option" data-platform="netlify" onclick="selectPlatform('netlify')">
+        <div class="logo-box"><img src="https://i.ibb.co.com/C3rLgN0Z/Mz4bv8Ja-400x400.png" alt="Netlify"></div>
+        <div class="name">Netlify</div>
+      </div>
+    </div>
+
+    <label class="label">🌐 Nama Website</label>
+    <div class="input-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <input type="text" id="siteName" placeholder="contoh: nuvyra-neo" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="input-hint" id="inputHint">Gunakan huruf kecil, angka, dan tanda hubung (-)</div>
+
+    <label class="label">⬆ Upload File</label>
+    <div class="upload-tabs">
+      <button class="upload-tab active" data-type="html" onclick="setUploadType('html')">📄 HTML</button>
+      <button class="upload-tab" data-type="css" onclick="setUploadType('css')">🎨 CSS</button>
+      <button class="upload-tab" data-type="js" onclick="setUploadType('js')">📜 JavaScript</button>
+      <button class="upload-tab" data-type="zip" onclick="setUploadType('zip')">📦 ZIP</button>
+    </div>
+
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" multiple onchange="handleFiles(event)">
+      <span class="drop-icon">☁</span>
+      <div class="drop-title">Drag & drop file di sini</div>
+      <div class="drop-subtitle">atau klik untuk browse</div>
+      <div class="drop-files" id="dropFiles"></div>
+    </div>
+
+    <button class="btn-generate" id="deployBtn" onclick="deployNow()">
+      <span id="deployBtnText">🚀 Deploy Sekarang</span>
+      <span class="arrow">→</span>
+    </button>
+
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">
+      <img src="https://i.ibb.co.com/9HMVjd4Y/file-0000000060b081fa838565a4f4e4a0d3.png" alt="Nuvyra Neo">
+    </div>
+    <h3>Belum ada website yang di-deploy</h3>
+    <p>Isi nama website + upload file di atas.<br>Website Anda akan langsung online.</p>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal" id="terminal">
+    <div class="term-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span>deploy — building website</span>
+    </div>
+    <div class="term-body">
+      <div class="term-target" id="termTarget"><span>site ›</span> -</div>
+      <div class="term-title">
+        <div class="spinner"></div>
+        <strong>Deploying to <span id="termPlatform">Vercel</span>...</strong>
+      </div>
+      <div class="term-desc">Membangun dan menerbitkan website Anda. Mohon tunggu sebentar.</div>
+      <div class="prog-row">
+        <span>Progress</span>
+        <span><span class="pct" id="progPct">0%</span> · <span id="progTime">0.0s / 5s</span></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+      <div class="step-list" id="stepList">
+        <div class="step"><div class="step-icon"></div>Preparing files</div>
+        <div class="step"><div class="step-icon"></div>Uploading to server</div>
+        <div class="step"><div class="step-icon"></div>Building project</div>
+        <div class="step"><div class="step-icon"></div>Optimizing assets</div>
+        <div class="step"><div class="step-icon"></div>Generating SSL</div>
+        <div class="step"><div class="step-icon"></div>Publishing to CDN</div>
+        <div class="step"><div class="step-icon"></div>Verifying deployment</div>
+        <div class="step"><div class="step-icon"></div>Website online!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result">
+    <div class="result-header">
+      <div class="result-tab">
+        <span class="tag" id="resultTag">
+          <img id="resultTagLogo" src="https://i.ibb.co.com/YFNsWZCV/IMG-20260926-192831.png" alt="Vercel">
+          VERCEL
+        </span>
+        <span id="resultName">website</span>
+      </div>
+      <div class="result-actions">
+        <button class="btn-sm" onclick="copyDeployUrl()">📋 Copy URL</button>
+        <button class="btn-sm btn-all" onclick="openDeployUrl()">🌐 Buka Website</button>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span class="status-ok"><span class="status-dot-green"></span> DEPLOYED</span>
+      <span id="statFiles">0 files</span>
+      <span id="statSize">0 KB</span>
+      <span id="statTime" style="margin-left:auto;"></span>
+    </div>
+    <div class="code-view">
+      <div>🎉 Website Anda berhasil di-deploy!</div>
+      <div style="margin-top:10px;">
+        <span class="deploy-url" id="deployUrl" onclick="openDeployUrl()">https://...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history" id="historyPanel" style="display:none;">
+    <div class="history-header">
+      <span><span class="icon">⟳</span>Riwayat Deploy</span>
+      <span id="histCount">0 entries</span>
+    </div>
+    <div class="history-body" id="histBody"></div>
+  </div>
+
+  <!-- TERMS -->
+  <div class="terms">
+    <div class="terms-title"><span>📋</span> Syarat & Ketentuan</div>
+    <ul class="terms-list">
+      <li>File yang diupload akan dipublikasikan secara otomatis.</li>
+      <li>Tidak boleh mengandung konten ilegal atau phishing.</li>
+      <li>Website bersifat publik & gratis.</li>
+    </ul>
+
+    <div class="contact-title"><span>💬</span> Kontak Admin</div>
+    <div class="contact-links">
+      <a href="https://wa.me/6281234567890" target="_blank" class="contact-link">
+        <span class="icon">📱</span>
+        <span>WhatsApp Owner</span>
+        <span class="arrow">→</span>
+      </a>
+      <a href="https://t.me/username" target="_blank" class="contact-link">
+        <span class="icon">✈</span>
+        <span>Telegram Owner</span>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">Created by <span class="footer-glow">Nuvyra Neo</span> 👻</div>
+
+</div>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">
+    <img src="https://i.ibb.co.com/9HMVjd4Y/file-0000000060b081fa838565a4f4e4a0d3.png" alt="Nuvyra Neo">
+  </div>
+  <div class="loading-ring"></div>
+  <div class="loading-text" id="loadingText">Deploying...</div>
+  <div class="loading-subtext" id="loadingSubtext">Mohon tunggu sebentar...</div>
+  <div class="loading-progress">
+    <div class="loading-progress-fill" id="loadingProgressFill"></div>
+  </div>
+</div>
+
+<!-- MINI LOADER -->
+<div class="mini-loader" id="miniLoader">
+  <div class="mini-loader-card">
+    <div class="mini-loader-spinner"></div>
+    <div class="mini-loader-text" id="miniLoaderText">Loading...</div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="success-modal" id="successModal">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Deploy Berhasil! 🎉</div>
+    <div class="success-subtitle" id="successSubtitle">Website Anda online di VERCEL</div>
+    <div class="success-url-box" id="successUrl" onclick="copySuccessUrl()">https://...</div>
+    <div class="success-actions">
+      <button class="success-btn success-btn-primary" onclick="openSuccessUrl()">
+        <span>🌐</span> Buka Website
+      </button>
+      <button class="success-btn success-btn-secondary" onclick="closeSuccessModal()">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+console.log('%c[Nuvyra Neo] v1.3 - Grayscale Edition', 'color: #d0d0d0; font-weight: bold; font-size: 14px;');
+
+// ==================== LOGO URLS ====================
+const LOGO_NUVYRA = 'https://i.ibb.co.com/9HMVjd4Y/file-0000000060b081fa838565a4f4e4a0d3.png';
+const LOGO_VERCEL = 'https://i.ibb.co.com/YFNsWZCV/IMG-20260926-192831.png';
+const LOGO_NETLIFY = 'https://i.ibb.co.com/C3rLgN0Z/Mz4bv8Ja-400x400.png';
+
+// ==================== PARTICLES ====================
+(function createParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+  const count = window.innerWidth < 768 ? 20 : 40;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    p.style.opacity = Math.random() * 0.5 + 0.2;
+    const size = Math.random() * 2 + 1;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    if (Math.random() > 0.7) p.style.background = '#d0d0d0';
+    if (Math.random() > 0.7) p.style.boxShadow = '0 0 10px #d0d0d0';
+    container.appendChild(p);
+  }
+})();
+
+// ==================== STATE ====================
+let currentPlatform = 'vercel';
+let uploadType = 'html';
+let uploadedFiles = [];
+let historyData = JSON.parse(localStorage.getItem('gd_history') || '[]');
+let currentDeployUrl = '';
+
+// ==================== TOAST ====================
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  const icons = { info: 'ℹ', success: '✓', error: '✕' };
+  t.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${msg}`;
+  t.className = 'toast show' + (type === 'success' ? ' success' : type === 'error' ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ==================== LOADING ====================
+const loadingScreen = document.getElementById('loadingScreen');
+const loadingText = document.getElementById('loadingText');
+const loadingSubtext = document.getElementById('loadingSubtext');
+const loadingProgressFill = document.getElementById('loadingProgressFill');
+const miniLoader = document.getElementById('miniLoader');
+const miniLoaderText = document.getElementById('miniLoaderText');
+
+function showLoading(text, subtext = 'Mohon tunggu sebentar...') {
+  loadingText.textContent = text;
+  loadingSubtext.textContent = subtext;
+  loadingProgressFill.style.width = '0%';
+  loadingScreen.classList.add('active');
+}
+function updateLoadingProgress(pct) {
+  loadingProgressFill.style.width = Math.min(pct, 100) + '%';
+}
+function hideLoading() {
+  loadingProgressFill.style.width = '100%';
+  setTimeout(() => loadingScreen.classList.remove('active'), 300);
+}
+function showMiniLoader(text = 'Loading...') {
+  miniLoaderText.textContent = text;
+  miniLoader.classList.add('active');
+}
+function hideMiniLoader() {
+  miniLoader.classList.remove('active');
+}
+
+// ==================== PLATFORM ====================
+function selectPlatform(platform) {
+  currentPlatform = platform;
+  document.querySelectorAll('.platform-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.platform === platform);
+  });
+
+  const badge = document.getElementById('platformBadge');
+  badge.textContent = '';
+  const newImg = document.createElement('img');
+  newImg.src = platform === 'vercel' ? LOGO_VERCEL : LOGO_NETLIFY;
+  newImg.alt = platform;
+  badge.appendChild(newImg);
+  badge.appendChild(document.createTextNode(` Platform: ${platform.toUpperCase()}`));
+  badge.className = 'platform-badge ' + platform;
+
+  document.getElementById('termPlatform').textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+  showToast(`Platform: ${platform.toUpperCase()}`, 'info');
+}
+
+// ==================== UPLOAD TYPE ====================
+function setUploadType(type) {
+  uploadType = type;
+  document.querySelectorAll('.upload-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.type === type);
+  });
+  const input = document.getElementById('fileInput');
+  const accepts = { html: '.html,.htm,.xhtml', css: '.css', js: '.js,.mjs,.cjs', zip: '.zip' };
+  input.setAttribute('accept', accepts[type] || '*/*');
+  const hints = {
+    html: 'Upload file HTML (index.html, dll)',
+    css: 'Upload file CSS (style.css, dll)',
+    js: 'Upload file JavaScript (script.js, dll)',
+    zip: 'Upload file ZIP berisi seluruh website'
+  };
+  document.getElementById('inputHint').textContent = hints[type];
+}
+
+// ==================== FILE HANDLING ====================
+function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  files.forEach(f => {
+    if (!uploadedFiles.find(x => x.name === f.name && x.size === f.size)) {
+      uploadedFiles.push(f);
+    }
+  });
+  renderFiles();
+  e.target.value = '';
+  if (uploadedFiles.length > 0) {
+    document.getElementById('emptyState').style.display = 'none';
+  }
+}
+
+function renderFiles() {
+  const container = document.getElementById('dropFiles');
+  if (uploadedFiles.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = uploadedFiles.map((f, i) => {
+    const icon = f.name.endsWith('.html') ? '📄'
+      : f.name.endsWith('.css') ? '🎨'
+      : f.name.endsWith('.js') ? '📜'
+      : f.name.endsWith('.zip') ? '📦' : '📎';
+    const size = (f.size / 1024).toFixed(1) + ' KB';
+    return `
+      <div class="drop-file-item">
+        <span class="file-icon">${icon}</span>
+        <span class="file-name">${f.name}</span>
+        <span class="file-size">${size}</span>
+        <button class="file-remove" onclick="event.stopPropagation();removeFile(${i})">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function removeFile(index) {
+  uploadedFiles.splice(index, 1);
+  renderFiles();
+  if (uploadedFiles.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+  }
+}
+
+// Drag & drop
+const dropZone = document.getElementById('dropZone');
+['dragenter', 'dragover'].forEach(evt => {
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.add('dragover');
+  });
+});
+['dragleave', 'drop'].forEach(evt => {
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.remove('dragover');
+  });
+});
+dropZone.addEventListener('drop', e => {
+  const files = Array.from(e.dataTransfer.files);
+  files.forEach(f => {
+    if (!uploadedFiles.find(x => x.name === f.name && x.size === f.size)) {
+      uploadedFiles.push(f);
+    }
+  });
+  renderFiles();
+  if (uploadedFiles.length > 0) {
+    document.getElementById('emptyState').style.display = 'none';
+  }
+});
+
+// ==================== DEPLOY ====================
+async function deployNow() {
+  const siteName = document.getElementById('siteName').value.trim();
+
+  if (!siteName) { showToast('Masukkan nama website dulu!', 'error'); return; }
+  if (!/^[a-z0-9-]+$/.test(siteName)) { showToast('Nama hanya boleh huruf kecil, angka, dan (-)', 'error'); return; }
+  if (uploadedFiles.length === 0) { showToast('Upload file dulu Tuan!', 'error'); return; }
+
+  const deployBtn = document.getElementById('deployBtn');
+  const deployBtnText = document.getElementById('deployBtnText');
+  deployBtn.disabled = true;
+  deployBtn.classList.add('loading');
+  deployBtnText.textContent = 'Deploying...';
+
+  const emptyState = document.getElementById('emptyState');
+  const terminal = document.getElementById('terminal');
+  const result = document.getElementById('result');
+
+  emptyState.style.display = 'none';
+  result.style.display = 'none';
+  terminal.style.display = 'block';
+
+  document.getElementById('termTarget').innerHTML = `<span>site ›</span> ${siteName}.${currentPlatform === 'vercel' ? 'vercel.app' : 'netlify.app'}`;
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('progPct').textContent = '0%';
+
+  document.querySelectorAll('.step').forEach(s => {
+    s.classList.remove('active', 'done');
+    s.querySelector('.step-icon').textContent = '';
+  });
+
+  showLoading('Deploying ke ' + currentPlatform.toUpperCase(), `Site: ${siteName}`);
+
+  let elapsed = 0;
+  const totalTime = 5000;
+  const progressInterval = setInterval(() => {
+    elapsed += 100;
+    const pct = Math.min((elapsed / totalTime) * 100, 95);
+    document.getElementById('progFill').style.width = pct + '%';
+    document.getElementById('progPct').textContent = Math.floor(pct) + '%';
+    document.getElementById('progTime').textContent = (elapsed / 1000).toFixed(1) + 's / 5s';
+    updateLoadingProgress(Math.min(pct, 95));
+  }, 100);
+
+  const stepTimings = [300, 800, 1500, 2200, 2800, 3300, 4000, 4700];
+  const stepTexts = [
+    'Preparing files...',
+    'Uploading to server...',
+    'Building project...',
+    'Optimizing assets...',
+    'Generating SSL...',
+    'Publishing to CDN...',
+    'Verifying deployment...',
+    'Website online!'
+  ];
+  stepTimings.forEach((t, i) => {
+    setTimeout(() => {
+      document.querySelectorAll('.step').forEach((s, idx) => {
+        if (idx < i) { s.classList.remove('active'); s.classList.add('done'); s.querySelector('.step-icon').textContent = '✓'; }
+        if (idx === i) { s.classList.add('active'); }
+      });
+      if (i > 0 && i < stepTexts.length) {
+        loadingText.textContent = stepTexts[i];
+      }
+    }, t);
+  });
+
+  await new Promise(r => setTimeout(r, totalTime));
+
+  clearInterval(progressInterval);
+  document.getElementById('progFill').style.width = '100%';
+  document.getElementById('progPct').textContent = '100%';
+  document.getElementById('progTime').textContent = '5.0s / 5s';
+  document.querySelectorAll('.step').forEach(s => {
+    s.classList.remove('active'); s.classList.add('done');
+    s.querySelector('.step-icon').textContent = '✓';
+  });
+  updateLoadingProgress(100);
+
+  const domain = currentPlatform === 'vercel' ? `${siteName}.vercel.app` : `${siteName}.netlify.app`;
+  const deployUrl = `https://${domain}`;
+  currentDeployUrl = deployUrl;
+
+  addHistory({
+    name: siteName,
+    url: deployUrl,
+    platform: currentPlatform,
+    files: uploadedFiles.length,
+    time: new Date().toLocaleString('id-ID'),
+    timestamp: Date.now()
+  });
+
+  setTimeout(() => {
+    hideLoading();
+    terminal.style.display = 'none';
+    result.style.display = 'block';
+
+    const resultTag = document.getElementById('resultTag');
+    const resultTagLogo = document.getElementById('resultTagLogo');
+    resultTagLogo.src = currentPlatform === 'vercel' ? LOGO_VERCEL : LOGO_NETLIFY;
+    resultTag.childNodes.forEach(n => {
+      if (n.nodeType === 3) n.textContent = '';
+    });
+    resultTag.appendChild(document.createTextNode(' ' + currentPlatform.toUpperCase()));
+    document.getElementById('resultName').textContent = siteName;
+    document.getElementById('deployUrl').textContent = domain;
+    document.getElementById('statFiles').textContent = uploadedFiles.length + ' files';
+    const totalSize = uploadedFiles.reduce((s, f) => s + f.size, 0);
+    document.getElementById('statSize').textContent = (totalSize / 1024).toFixed(1) + ' KB';
+    document.getElementById('statTime').textContent = new Date().toLocaleTimeString('id-ID');
+
+    showToast('Website berhasil di-deploy! 🎉', 'success');
+    showSuccessModal(deployUrl, currentPlatform);
+
+    uploadedFiles = [];
+    renderFiles();
+    document.getElementById('siteName').value = '';
+  }, 400);
+
+  deployBtn.disabled = false;
+  deployBtn.classList.remove('loading');
+  deployBtnText.textContent = '🚀 Deploy Sekarang';
+}
+
+// ==================== SUCCESS MODAL ====================
+function showSuccessModal(url, platform) {
+  document.getElementById('successUrl').textContent = url.replace('https://', '');
+  document.getElementById('successSubtitle').textContent = `Website Anda online di ${platform.toUpperCase()}`;
+  document.getElementById('successModal').classList.add('active');
+}
+
+function closeSuccessModal() {
+  document.getElementById('successModal').classList.remove('active');
+}
+
+function openSuccessUrl() {
+  const urlText = document.getElementById('successUrl').textContent;
+  window.open('https://' + urlText, '_blank');
+}
+
+function copySuccessUrl() {
+  const urlText = document.getElementById('successUrl').textContent;
+  const fullUrl = 'https://' + urlText;
+
+  showMiniLoader('Menyalin URL...');
+
+  setTimeout(() => {
+    let success = false;
+    try {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(fullUrl);
+        success = true;
+      }
+    } catch (e) { console.warn(e); }
+
+    if (!success) {
+      const ta = document.createElement('textarea');
+      ta.value = fullUrl;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, 999999);
+      try { success = document.execCommand('copy'); } catch (e) { console.warn(e); }
+      document.body.removeChild(ta);
+    }
+
+    hideMiniLoader();
+
+    if (success) {
+      showToast('URL disalin ke clipboard!', 'success');
+      const box = document.getElementById('successUrl');
+      box.style.borderColor = '#34d399';
+      box.style.boxShadow = '0 0 25px rgba(16,185,129,0.6)';
+      setTimeout(() => { box.style.borderColor = ''; box.style.boxShadow = ''; }, 1500);
+    } else {
+      showToast('Gagal menyalin, copy manual ya', 'error');
+    }
+  }, 300);
+}
+
+// ==================== ACTIONS ====================
+function copyDeployUrl() {
+  if (!currentDeployUrl) { showToast('Belum ada URL', 'error'); return; }
+  showMiniLoader('Menyalin URL...');
+
+  setTimeout(() => {
+    let success = false;
+    try {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(currentDeployUrl);
+        success = true;
+      }
+    } catch (e) {}
+
+    if (!success) {
+      const ta = document.createElement('textarea');
+      ta.value = currentDeployUrl;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      try { success = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    hideMiniLoader();
+    if (success) showToast('URL disalin!', 'success');
+    else showToast('Gagal menyalin', 'error');
+  }, 400);
+}
+
+function openDeployUrl() {
+  if (!currentDeployUrl) { showToast('Belum ada URL', 'error'); return; }
+  window.open(currentDeployUrl, '_blank');
+}
+
+// ==================== HISTORY ====================
+function addHistory(data) {
+  historyData.unshift(data);
+  if (historyData.length > 20) historyData = historyData.slice(0, 20);
+  localStorage.setItem('gd_history', JSON.stringify(historyData));
+  renderHistory();
+}
+
+function renderHistory() {
+  const panel = document.getElementById('historyPanel');
+  const body = document.getElementById('histBody');
+  const count = document.getElementById('histCount');
+
+  if (historyData.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  count.textContent = historyData.length + ' entries';
+
+  body.innerHTML = historyData.map((h, i) => {
+    const logo = h.platform === 'vercel' ? LOGO_VERCEL : LOGO_NETLIFY;
+    return `
+      <div class="hist-item" onclick="window.open('${h.url}', '_blank')">
+        <div class="hist-platform ${h.platform}">
+          <img src="${logo}" alt="${h.platform}">
+        </div>
+        <div class="hist-info">
+          <div class="hist-name">${h.name}</div>
+          <div class="hist-url">${h.url.replace('https://', '')}</div>
+          <div class="hist-meta">${h.time} · ${h.files} file(s)</div>
+        </div>
+        <button class="hist-del" onclick="event.stopPropagation();delHistory(${i})">🗑</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function delHistory(i) {
+  historyData.splice(i, 1);
+  localStorage.setItem('gd_history', JSON.stringify(historyData));
+  renderHistory();
+  showToast('Riwayat dihapus');
+}
+
+// ==================== INIT ====================
+document.getElementById('siteName').addEventListener('input', e => {
+  e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+});
+setUploadType('html');
+renderHistory();
+</script>
+</body>
+  </html>
